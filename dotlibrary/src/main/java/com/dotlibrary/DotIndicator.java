@@ -6,7 +6,9 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.support.annotation.Nullable;
-import android.support.v4.view.ViewPager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.RecyclerView.OnScrollListener;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -14,10 +16,12 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 
 /**
- * Created by Administrator on 2017/6/26 0026.
+ * update by cx on 2018/10/31.
  */
 
-public class BezierBannerDot extends View implements ViewPager.OnPageChangeListener {
+public class DotIndicator extends View {
+    public static final boolean DEBUG=false;
+    private static final String TAG = "DotIndicator";
     //选中画笔
     private Paint mCirclePaint;
     //背景画笔
@@ -88,20 +92,20 @@ public class BezierBannerDot extends View implements ViewPager.OnPageChangeListe
     public static int DIRECTION_LEFT = 1;
     //向左滑 向右滚动
     public static int DIRECTION_RIGHT = 2;
-    private static final String TAG="tag";
+    
 
     Interpolator accelerateinterpolator = new AccelerateDecelerateInterpolator();
 
 
-    public BezierBannerDot(Context context) {
+    public DotIndicator(Context context) {
         this(context, null);
     }
 
-    public BezierBannerDot(Context context, @Nullable AttributeSet attrs) {
+    public DotIndicator(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public BezierBannerDot(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public DotIndicator(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initattrs(attrs);
         initPaint();
@@ -126,12 +130,12 @@ public class BezierBannerDot extends View implements ViewPager.OnPageChangeListe
     }
 
     private void initattrs(AttributeSet attrs) {
-        TypedArray typedArray=getContext().obtainStyledAttributes(attrs,R.styleable.BezierBannerDot);
-        mSelectedColor=typedArray.getColor(R.styleable.BezierBannerDot_selectedColor,0xFFFFFFFF);
-        mUnSelectedColor=typedArray.getColor(R.styleable.BezierBannerDot_unSelectedColor,0xFFAAAAAA);
-        mRadius=typedArray.getDimension(R.styleable.BezierBannerDot_selectedRadius,mRadius);
-        mNomarlRadius=typedArray.getDimension(R.styleable.BezierBannerDot_unSelectedRadius,mNomarlRadius);
-        distance=typedArray.getDimension(R.styleable.BezierBannerDot_spacing,distance);
+        TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.BezierBannerDot);
+        mSelectedColor = typedArray.getColor(R.styleable.BezierBannerDot_selectedColor, 0xFFFFFFFF);
+        mUnSelectedColor = typedArray.getColor(R.styleable.BezierBannerDot_unSelectedColor, 0xFFAAAAAA);
+        mRadius = typedArray.getDimension(R.styleable.BezierBannerDot_selectedRadius, mRadius);
+        mNomarlRadius = typedArray.getDimension(R.styleable.BezierBannerDot_unSelectedRadius, mNomarlRadius);
+        distance = typedArray.getDimension(R.styleable.BezierBannerDot_spacing, distance);
         typedArray.recycle();
     }
 
@@ -175,22 +179,22 @@ public class BezierBannerDot extends View implements ViewPager.OnPageChangeListe
         canvas.translate(getPaddingLeft(), getPaddingTop());
 
         //画暂不活动的背景圆
-            for (int i = 0; i < count; i++) {
-                if (mDrection == DIRECTION_RIGHT) {
-                    if (i == mSelectedIndex || i == mSelectedIndex + 1) {
-                        //活动的就不用画了
-                    } else {
-                        canvas.drawCircle(getCenterPointAt(i), mRadius, mNomarlRadius, mCirclePaint2);
-                    }
+        for (int i = 0; i < count; i++) {
+            if (mDrection == DIRECTION_RIGHT) {
+                if (i == mSelectedIndex || i == mSelectedIndex + 1) {
+                    //活动的就不用画了
+                } else {
+                    canvas.drawCircle(getCenterPointAt(i), mRadius, mNomarlRadius, mCirclePaint2);
+                }
 
-                } else if (mDrection == DIRECTION_LEFT) {
-                    if (i == mSelectedIndex || i == mSelectedIndex - 1) {
-                        //活动的就不用画了
-                    } else {
-                        canvas.drawCircle(getCenterPointAt(i), mRadius, mNomarlRadius, mCirclePaint2);
-                    }
+            } else if (mDrection == DIRECTION_LEFT) {
+                if (i == mSelectedIndex || i == mSelectedIndex - 1) {
+                    //活动的就不用画了
+                } else {
+                    canvas.drawCircle(getCenterPointAt(i), mRadius, mNomarlRadius, mCirclePaint2);
                 }
             }
+        }
 
         //画活动背景圆
         canvas.drawCircle(mSupport_next_centerX, mSupport_next_centerY, mSupport_Next_ChangeRadius, mCirclePaint2);
@@ -207,12 +211,15 @@ public class BezierBannerDot extends View implements ViewPager.OnPageChangeListe
 
     /**
      * 转化整体进度值使两个阶段的运动进度都是0-1
+     *
      * @param progress 当前整体进度
      */
     public void setProgress(float progress) {
         //viewpager滑动完毕返回的0不需要，拦截掉
         if (progress == 0) {
-            Log.d(TAG, "拦截");
+            if (DEBUG) {
+                Log.d(TAG, "拦截");
+            }
             return;
         }
         mOriginProgress = progress;
@@ -230,7 +237,9 @@ public class BezierBannerDot extends View implements ViewPager.OnPageChangeListe
             moveToPrivous();
         }
         invalidate();
-        Log.d(TAG, "刷新");
+       if (DEBUG) {
+           Log.d(TAG, "刷新");
+       }
 
 
     }
@@ -427,8 +436,9 @@ public class BezierBannerDot extends View implements ViewPager.OnPageChangeListe
 
     /**
      * 获取当前值(适用分阶段变化的值)
+     *
      * @param start 初始值
-     * @param end  终值
+     * @param end   终值
      * @param step  第几活动阶段
      * @return
      */
@@ -439,10 +449,12 @@ public class BezierBannerDot extends View implements ViewPager.OnPageChangeListe
             return start + (end - start) * mProgress2;
         }
     }
+
     /**
      * 获取当前值（适用全过程变化的值）
+     *
      * @param start 初始值
-     * @param end  终值
+     * @param end   终值
      * @return
      */
     public float getValueForAll(float start, float end) {
@@ -451,8 +463,9 @@ public class BezierBannerDot extends View implements ViewPager.OnPageChangeListe
 
     /**
      * 通过进度获取当前值
-     * @param start 初始值
-     * @param end 终值
+     *
+     * @param start    初始值
+     * @param end      终值
      * @param progress 当前进度
      * @return
      */
@@ -462,6 +475,7 @@ public class BezierBannerDot extends View implements ViewPager.OnPageChangeListe
 
     /**
      * 获取圆心X坐标
+     *
      * @param index 第几个圆
      * @return
      */
@@ -489,21 +503,52 @@ public class BezierBannerDot extends View implements ViewPager.OnPageChangeListe
     /**
      * 绑定viewpager
      */
-    public void attachToViewpager(ViewPager viewPager) {
-        viewPager.addOnPageChangeListener(this);
-        count = viewPager.getAdapter().getCount();
+    public void attachToRecyclerView(RecyclerView recyclerView) {
+        recyclerView.addOnScrollListener(new OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                DotIndicator.this.onScrolled(recyclerView, dx, dy);
+            }
+        });
+        count = recyclerView.getAdapter().getItemCount();
         moveToNext();
-        mDrection=DIRECTION_RIGHT;
+        mDrection = DIRECTION_RIGHT;
         invalidate();
     }
 
+    private void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+        RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+        if (layoutManager instanceof LinearLayoutManager) {
+            LinearLayoutManager manager = (LinearLayoutManager) layoutManager;
+            if (manager.canScrollHorizontally()) {
+                int fp = manager.findFirstVisibleItemPosition();
+                int lp = manager.findLastVisibleItemPosition();
+                View lastView = manager.findViewByPosition(lp);
+                int width = manager.getChildAt(0).getWidth();
+                if (width != 0 && lastView != null) {
+                    float right = recyclerView.getWidth() - lastView.getLeft();
+                    float ratio = right / width;
+                    onPageScrolled(lp, ratio);
+                }
 
-    @Override
-    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
+        }
+    }
+
+
+    public void onPageScrolled(int position, float positionOffset) {
         //偏移量为0 说明运动停止
         if (positionOffset == 0) {
             mSelectedIndex = position;
-            Log.d("tag", "到达");
+           if (DEBUG) {
+               Log.d(TAG, "到达");
+           }
             resetProgress();
         }
         //向左滑，指示器向右移动
@@ -512,7 +557,9 @@ public class BezierBannerDot extends View implements ViewPager.OnPageChangeListe
             //向左快速滑动 偏移量不归0 但是position发生了改变 需要更新当前索引
             if (mDrection == DIRECTION_RIGHT && position + positionOffset > mSelectedIndex + 1) {
                 mSelectedIndex = position;
-                Log.d(TAG, "向左快速滑动");
+                if (DEBUG) {
+                    Log.d(TAG, "向左快速滑动");
+                }
             } else {
                 setProgress(positionOffset);
             }
@@ -521,7 +568,9 @@ public class BezierBannerDot extends View implements ViewPager.OnPageChangeListe
             //向右快速滑动
             if (mDrection == DIRECTION_LEFT && position + positionOffset < mSelectedIndex - 1) {
                 mSelectedIndex = position;
-                Log.d(TAG, "向右快速滑动");
+               if (DEBUG) {
+                   Log.d(TAG, "向右快速滑动");
+               }
             } else {
                 setProgress(1 - positionOffset);
             }
@@ -529,14 +578,5 @@ public class BezierBannerDot extends View implements ViewPager.OnPageChangeListe
 
     }
 
-    @Override
-    public void onPageSelected(int position) {
-
-    }
-
-    @Override
-    public void onPageScrollStateChanged(int state) {
-
-    }
 
 }
