@@ -107,7 +107,7 @@ public class DotIndicator extends View {
 
     public DotIndicator(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        initattrs(attrs);
+        initAttrs(attrs);
         initPaint();
     }
 
@@ -129,7 +129,7 @@ public class DotIndicator extends View {
 
     }
 
-    private void initattrs(AttributeSet attrs) {
+    private void initAttrs(AttributeSet attrs) {
         TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.BezierBannerDot);
         mSelectedColor = typedArray.getColor(R.styleable.BezierBannerDot_selectedColor, 0xFFFFFFFF);
         mUnSelectedColor = typedArray.getColor(R.styleable.BezierBannerDot_unSelectedColor, 0xFFAAAAAA);

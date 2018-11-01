@@ -26,9 +26,9 @@
             android:layout_alignParentBottom="true"
             android:paddingBottom="20dp"
             app:selectedColor="@android:color/white"
-            app:selectedRaduis="13dp"
+            app:selectedRadius="13dp"
             app:spacing="20dp"
             app:unSelectedColor="@android:color/darker_gray"
-            app:unSelectedRaduis="10dp" />
+            app:unSelectedRadius="10dp" />
     </LinearLayout>
 </RelativeLayout>
