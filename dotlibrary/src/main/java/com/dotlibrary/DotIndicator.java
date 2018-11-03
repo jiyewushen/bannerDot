@@ -47,7 +47,7 @@ public class DotIndicator extends View {
     //起始圆辅助圆变化半径
     private float mSupportChangeRadius;
     //将要到达位置的背景圆的辅助圆变化半径
-    private float mSupport_Next_ChangeRadius;
+    private float msupportNextChangeradius;
     //起始圆圆心坐标
     float mCenterPointX;
     float mCenterPointY;
@@ -55,8 +55,8 @@ public class DotIndicator extends View {
     float mSupportCircleX;
     float mSupportCircleY;
     //当前背景圆圆心坐标
-    float mSupport_next_centerX;
-    float mSupport_next_centerY;
+    float msupportNextCenterx;
+    float msupportNextCentery;
     //将要到达位置的背景圆圆心坐标
     float mbgNextPointX;
     float mbgNextPointY;
@@ -75,9 +75,9 @@ public class DotIndicator extends View {
     private int count;
 
     //第一阶段运动
-    private int MOVE_STEP_ONE = 1;
+    private int moveStepOne = 1;
     //第二阶段运动
-    private int MOVE_STEP_TWO = 2;
+    private int moveStepTwo = 2;
     //控制点坐标
     float controlPointX;
     float controlPointY;
@@ -197,7 +197,7 @@ public class DotIndicator extends View {
         }
 
         //画活动背景圆
-        canvas.drawCircle(mSupport_next_centerX, mSupport_next_centerY, mSupport_Next_ChangeRadius, mCirclePaint2);
+        canvas.drawCircle(msupportNextCenterx, msupportNextCentery, msupportNextChangeradius, mCirclePaint2);
         canvas.drawCircle(mbgNextPointX, mbgNextPointY, mChangeBgRadius, mCirclePaint2);
         canvas.drawPath(mPath2, mCirclePaint2);
         //画选中圆
@@ -220,16 +220,22 @@ public class DotIndicator extends View {
             if (DEBUG) {
                 Log.d(TAG, "拦截");
             }
+            resetProgress();
+            if (mDrection == DIRECTION_RIGHT) {
+                moveToNext();
+            } else {
+                moveToPrivous();
+            }
+            invalidate();
             return;
         }
         mOriginProgress = progress;
-        if (progress <= 0.5) {
+        if (progress <= 0.5f) {
             mProgress = progress / 0.5f;
             mProgress2 = 0;
         } else {
             mProgress2 = (progress - 0.5f) / 0.5f;
             mProgress = 1;
-
         }
         if (mDrection == DIRECTION_RIGHT) {
             moveToNext();
@@ -240,8 +246,6 @@ public class DotIndicator extends View {
        if (DEBUG) {
            Log.d(TAG, "刷新");
        }
-
-
     }
 
     /**
@@ -255,25 +259,25 @@ public class DotIndicator extends View {
         float mRadiusProgress = accelerateinterpolator.getInterpolation(mOriginProgress);
         //----------------------选中圆--------------------------------
         //起始圆圆心
-        mCenterPointX = getValue(getCenterPointAt(mSelectedIndex), getCenterPointAt(mSelectedIndex + 1) - mRadius, MOVE_STEP_TWO);
+        mCenterPointX = getValue(getCenterPointAt(mSelectedIndex), getCenterPointAt(mSelectedIndex + 1) - mRadius, moveStepTwo);
         mCenterPointY = mRadius;
         //起始圆半径
         mChangeRadius = getValue(mRadius, 0, mRadiusProgress);
 
         //起点与起始圆圆心间的角度
-        double radian = Math.toRadians(getValue(45, 0, MOVE_STEP_ONE));
+        double radian = Math.toRadians(getValue(45, 0, moveStepOne));
         //X轴距离圆心距离
         float mX = (float) (Math.sin(radian) * mChangeRadius);
         //Y轴距离圆心距离
         float mY = (float) (Math.cos(radian) * mChangeRadius);
 
         //辅助圆
-        mSupportCircleX = getValue(getCenterPointAt(mSelectedIndex) + mRadius, getCenterPointAt(mSelectedIndex + 1), MOVE_STEP_ONE);
+        mSupportCircleX = getValue(getCenterPointAt(mSelectedIndex) + mRadius, getCenterPointAt(mSelectedIndex + 1), moveStepOne);
         mSupportCircleY = mRadius;
         mSupportChangeRadius = getValue(0, mRadius, mRadiusProgress);
 
         //终点与辅助圆圆心间的角度
-        double supportradian = Math.toRadians(getValue(0, 45, MOVE_STEP_TWO));
+        double supportradian = Math.toRadians(getValue(0, 45, moveStepTwo));
         //X轴距离圆心距离
         float msupportradianX = (float) (Math.sin(supportradian) * mSupportChangeRadius);
         //Y轴距离圆心距离
@@ -302,45 +306,45 @@ public class DotIndicator extends View {
 
         //----------------------背景圆反方向移动--------------------------------
         //起始圆圆心
-        mbgNextPointX = getValue(getCenterPointAt(mSelectedIndex + 1), getCenterPointAt(mSelectedIndex) + mNomarlRadius, MOVE_STEP_TWO);
+        mbgNextPointX = getValue(getCenterPointAt(mSelectedIndex + 1), getCenterPointAt(mSelectedIndex) + mNomarlRadius, moveStepTwo);
         mbgNextPointY = mRadius;
         //起始圆半径
         mChangeBgRadius = getValue(mNomarlRadius, 0, mRadiusProgress);
 
         //起点与起始圆圆心间的角度
-        double m_Next_radian = Math.toRadians(getValue(45, 0, MOVE_STEP_ONE));
-        float mX_next = (float) (Math.sin(m_Next_radian) * mChangeBgRadius);
-        float mY_next = (float) (Math.cos(m_Next_radian) * mChangeBgRadius);
+        double mNextRadian = Math.toRadians(getValue(45, 0, moveStepOne));
+        float mxNext = (float) (Math.sin(mNextRadian) * mChangeBgRadius);
+        float myNext = (float) (Math.cos(mNextRadian) * mChangeBgRadius);
         //辅助圆圆心
-        mSupport_next_centerX = getValue(getCenterPointAt(mSelectedIndex + 1) - mNomarlRadius, getCenterPointAt(mSelectedIndex), MOVE_STEP_ONE);
-        mSupport_next_centerY = mRadius;
+        msupportNextCenterx = getValue(getCenterPointAt(mSelectedIndex + 1) - mNomarlRadius, getCenterPointAt(mSelectedIndex), moveStepOne);
+        msupportNextCentery = mRadius;
         //辅助圆半径
-        mSupport_Next_ChangeRadius = getValue(0, mNomarlRadius, mRadiusProgress);
+        msupportNextChangeradius = getValue(0, mNomarlRadius, mRadiusProgress);
 
         //终点与辅助圆圆心间的角度
-        double mSupport_Next_radian = Math.toRadians(getValue(0, 45, MOVE_STEP_TWO));
-        float mSupport_Next_radianX = (float) (Math.sin(mSupport_Next_radian) * mSupport_Next_ChangeRadius);
-        float mSupport_Next_radianY = (float) (Math.cos(mSupport_Next_radian) * mSupport_Next_ChangeRadius);
+        double msupportNextRadian = Math.toRadians(getValue(0, 45, moveStepTwo));
+        float msupportNextRadianx = (float) (Math.sin(msupportNextRadian) * msupportNextChangeradius);
+        float msupportNextRadiany = (float) (Math.cos(msupportNextRadian) * msupportNextChangeradius);
 
         //起点
-        float startPoint_support_nextX = mbgNextPointX - mX_next;
-        float startPoint_support_nextY = mbgNextPointY - mY_next;
+        float startpointSupportNextx = mbgNextPointX - mxNext;
+        float startpointSupportNexty = mbgNextPointY - myNext;
 
         //终点
-        float endPoint_support_nextX = mSupport_next_centerX + mSupport_Next_radianX;
-        float endPoint_support_nextY = mSupport_next_centerY - mSupport_Next_radianY;
+        float endpointSupportNextx = msupportNextCenterx + msupportNextRadianx;
+        float endpointSupportNexty = msupportNextCentery - msupportNextRadiany;
 
         //控制点
-        float controlPointX_Next = getValueForAll(getCenterPointAt(mSelectedIndex + 1) - mNomarlRadius, getCenterPointAt(mSelectedIndex) + mNomarlRadius);
-        float controlPointY_Next = mRadius;
+        float controlpointxNext = getValueForAll(getCenterPointAt(mSelectedIndex + 1) - mNomarlRadius, getCenterPointAt(mSelectedIndex) + mNomarlRadius);
+        float controlpointyNext = mRadius;
 
         //移动到起点
-        mPath2.moveTo(startPoint_support_nextX, startPoint_support_nextY);
+        mPath2.moveTo(startpointSupportNextx, startpointSupportNexty);
         //形成闭合区域
-        mPath2.quadTo(controlPointX_Next, controlPointY_Next, endPoint_support_nextX, endPoint_support_nextY);
-        mPath2.lineTo(endPoint_support_nextX, mRadius + mSupport_Next_radianY);
-        mPath2.quadTo(controlPointX_Next, controlPointY_Next, startPoint_support_nextX, startPoint_support_nextY + 2 * mY_next);
-        mPath2.lineTo(startPoint_support_nextX, startPoint_support_nextY);
+        mPath2.quadTo(controlpointxNext, controlpointyNext, endpointSupportNextx, endpointSupportNexty);
+        mPath2.lineTo(endpointSupportNextx, mRadius + msupportNextRadiany);
+        mPath2.quadTo(controlpointxNext, controlpointyNext, startpointSupportNextx, startpointSupportNexty + 2 * myNext);
+        mPath2.lineTo(startpointSupportNextx, startpointSupportNexty);
 
     }
 
@@ -355,24 +359,24 @@ public class DotIndicator extends View {
         float mRadiusProgress = accelerateinterpolator.getInterpolation(mOriginProgress);
 
         //----------------------选中圆--------------------------------
-        mCenterPointX = getValue(getCenterPointAt(mSelectedIndex), getCenterPointAt(mSelectedIndex - 1) + mRadius, MOVE_STEP_TWO);
+        mCenterPointX = getValue(getCenterPointAt(mSelectedIndex), getCenterPointAt(mSelectedIndex - 1) + mRadius, moveStepTwo);
         mCenterPointY = mRadius;
         mChangeRadius = getValue(mRadius, 0, mRadiusProgress);
         //起点与起始圆圆心间的角度
-        double radian = Math.toRadians(getValue(45, 0, MOVE_STEP_ONE));
+        double radian = Math.toRadians(getValue(45, 0, moveStepOne));
         //X轴距离圆心距离
         float mX = (float) (Math.sin(radian) * mChangeRadius);
         //Y轴距离圆心距离
         float mY = (float) (Math.cos(radian) * mChangeRadius);
 
         //辅助圆
-        mSupportCircleX = getValue(getCenterPointAt(mSelectedIndex) - mRadius, getCenterPointAt(mSelectedIndex - 1), MOVE_STEP_ONE);
+        mSupportCircleX = getValue(getCenterPointAt(mSelectedIndex) - mRadius, getCenterPointAt(mSelectedIndex - 1), moveStepOne);
         mSupportCircleY = mRadius;
         mSupportChangeRadius = getValue(0, mRadius, mRadiusProgress);
 
 
         //终点与辅助圆圆心间的角度
-        double supportradian = Math.toRadians(getValue(0, 45, MOVE_STEP_TWO));
+        double supportradian = Math.toRadians(getValue(0, 45, moveStepTwo));
         //X轴距离圆心距离
         float msupportradianX = (float) (Math.sin(supportradian) * mSupportChangeRadius);
         //Y轴距离圆心距离
@@ -395,41 +399,41 @@ public class DotIndicator extends View {
 
 
         //----------------------背景圆反方向移动--------------------------------
-        mbgNextPointX = getValue(getCenterPointAt(mSelectedIndex - 1), getCenterPointAt(mSelectedIndex) - mNomarlRadius, MOVE_STEP_TWO);
+        mbgNextPointX = getValue(getCenterPointAt(mSelectedIndex - 1), getCenterPointAt(mSelectedIndex) - mNomarlRadius, moveStepTwo);
         mbgNextPointY = mRadius;
         mChangeBgRadius = getValue(mNomarlRadius, 0, mRadiusProgress);
         //起点与起始圆圆心间的角度
-        double m_Next_radian = Math.toRadians(getValue(45, 0, MOVE_STEP_ONE));
+        double mNextRadian = Math.toRadians(getValue(45, 0, moveStepOne));
         //X轴距离圆心距离
-        float mX_next = (float) (Math.sin(m_Next_radian) * mChangeBgRadius);
+        float mxNext = (float) (Math.sin(mNextRadian) * mChangeBgRadius);
         //Y轴距离圆心距离
-        float mY_next = (float) (Math.cos(m_Next_radian) * mChangeBgRadius);
+        float myNext = (float) (Math.cos(mNextRadian) * mChangeBgRadius);
 
-        mSupport_next_centerX = getValue(getCenterPointAt(mSelectedIndex - 1) + mNomarlRadius, getCenterPointAt(mSelectedIndex), MOVE_STEP_ONE);
-        mSupport_next_centerY = mRadius;
-        mSupport_Next_ChangeRadius = getValue(0, mNomarlRadius, mRadiusProgress);
+        msupportNextCenterx = getValue(getCenterPointAt(mSelectedIndex - 1) + mNomarlRadius, getCenterPointAt(mSelectedIndex), moveStepOne);
+        msupportNextCentery = mRadius;
+        msupportNextChangeradius = getValue(0, mNomarlRadius, mRadiusProgress);
 
         //终点与辅助圆圆心间的角度
-        double mSupport_Next_radian = Math.toRadians(getValue(0, 45, MOVE_STEP_TWO));
+        double msupportNextRadian = Math.toRadians(getValue(0, 45, moveStepTwo));
         //X轴距离圆心距离
-        float mSupport_Next_radianX = (float) (Math.sin(mSupport_Next_radian) * mSupport_Next_ChangeRadius);
+        float msupportNextRadianx = (float) (Math.sin(msupportNextRadian) * msupportNextChangeradius);
         //Y轴距离圆心距离
-        float mSupport_Next_radianY = (float) (Math.cos(mSupport_Next_radian) * mSupport_Next_ChangeRadius);
+        float msupportNextRadiany = (float) (Math.cos(msupportNextRadian) * msupportNextChangeradius);
 
-        float startPoint_support_nextX = mbgNextPointX + mX_next;
-        float startPoint_support_nextY = mbgNextPointY - mY_next;
+        float startpointSupportNextx = mbgNextPointX + mxNext;
+        float startpointSupportNexty = mbgNextPointY - myNext;
 
-        float endPoint_support_nextX = mSupport_next_centerX - mSupport_Next_radianX;
-        float endPoint_support_nextY = mSupport_next_centerY - mSupport_Next_radianY;
+        float endpointSupportNextx = msupportNextCenterx - msupportNextRadianx;
+        float endpointSupportNexty = msupportNextCentery - msupportNextRadiany;
 
-        float controlPointX_Next = getValueForAll(getCenterPointAt(mSelectedIndex - 1) + mNomarlRadius, getCenterPointAt(mSelectedIndex) - mNomarlRadius);
-        float controlPointY_Next = mRadius;
+        float controlpointxNext = getValueForAll(getCenterPointAt(mSelectedIndex - 1) + mNomarlRadius, getCenterPointAt(mSelectedIndex) - mNomarlRadius);
+        float controlpointyNext = mRadius;
 
-        mPath2.moveTo(startPoint_support_nextX, startPoint_support_nextY);
-        mPath2.quadTo(controlPointX_Next, controlPointY_Next, endPoint_support_nextX, endPoint_support_nextY);
-        mPath2.lineTo(endPoint_support_nextX, mRadius + mSupport_Next_radianY);
-        mPath2.quadTo(controlPointX_Next, controlPointY_Next, startPoint_support_nextX, startPoint_support_nextY + 2 * mY_next);
-        mPath2.lineTo(startPoint_support_nextX, startPoint_support_nextY);
+        mPath2.moveTo(startpointSupportNextx, startpointSupportNexty);
+        mPath2.quadTo(controlpointxNext, controlpointyNext, endpointSupportNextx, endpointSupportNexty);
+        mPath2.lineTo(endpointSupportNextx, mRadius + msupportNextRadiany);
+        mPath2.quadTo(controlpointxNext, controlpointyNext, startpointSupportNextx, startpointSupportNexty + 2 * myNext);
+        mPath2.lineTo(startpointSupportNextx, startpointSupportNexty);
 
     }
 
@@ -443,7 +447,7 @@ public class DotIndicator extends View {
      * @return
      */
     public float getValue(float start, float end, int step) {
-        if (step == MOVE_STEP_ONE) {
+        if (step == moveStepOne) {
             return start + (end - start) * mProgress;
         } else {
             return start + (end - start) * mProgress2;
@@ -508,6 +512,7 @@ public class DotIndicator extends View {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
+                DotIndicator.this.onScrollStateChanged(recyclerView,newState);
             }
 
             @Override
@@ -522,34 +527,71 @@ public class DotIndicator extends View {
         invalidate();
     }
 
+    public void setSelectedIndex(int selectedIndex) {
+        mSelectedIndex = selectedIndex;
+        resetProgress();
+        if (mDrection == DIRECTION_RIGHT) {
+            moveToNext();
+        } else {
+            moveToPrivous();
+        }
+        invalidate();
+    }
+
+    private void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+        switch (newState){
+            case RecyclerView.SCROLL_STATE_IDLE:
+                break;
+            case RecyclerView.SCROLL_STATE_DRAGGING:
+                break;
+            case RecyclerView.SCROLL_STATE_SETTLING:
+                break;
+            default:
+                break;
+        }
+    }
+
+
     private void onScrolled(RecyclerView recyclerView, int dx, int dy) {
         RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
         if (layoutManager instanceof LinearLayoutManager) {
             LinearLayoutManager manager = (LinearLayoutManager) layoutManager;
             if (manager.canScrollHorizontally()) {
                 int fp = manager.findFirstVisibleItemPosition();
-                int lp = manager.findLastVisibleItemPosition();
-                View lastView = manager.findViewByPosition(lp);
+                /**
+                 * fp==lp出现情况：在每一个Item的宽度恰好等于RecyclerView的长度时，当总Item数目为1,则二者恒等
+                 * 如果大于1,当第一个Item或最后一个Item完全显示时出现。
+                 */
+                View firstView = manager.findViewByPosition(fp);
                 int width = manager.getChildAt(0).getWidth();
-                if (width != 0 && lastView != null) {
-                    float right = recyclerView.getWidth() - lastView.getLeft();
-                    float ratio = right / width;
-                    onPageScrolled(lp, ratio);
+                if (width != 0) {
+                    if (firstView!=null) {
+                        float right = recyclerView.getWidth() -firstView.getRight();
+                        float ratio = right / width;
+                        onPageScrolled(fp, ratio);
+                    }
                 }
 
             }
         }
     }
 
-
+    /**
+     * @param position
+     * @param positionOffset 表示偏移量，当positionOffset为0时表示运动停止
+     */
     public void onPageScrolled(int position, float positionOffset) {
         //偏移量为0 说明运动停止
         if (positionOffset == 0) {
             mSelectedIndex = position;
-           if (DEBUG) {
-               Log.d(TAG, "到达");
-           }
             resetProgress();
+            if (mDrection == DIRECTION_RIGHT) {
+                moveToNext();
+            } else {
+                moveToPrivous();
+            }
+            invalidate();
+            return;
         }
         //向左滑，指示器向右移动
         if (position + positionOffset - mSelectedIndex > 0) {
@@ -557,9 +599,6 @@ public class DotIndicator extends View {
             //向左快速滑动 偏移量不归0 但是position发生了改变 需要更新当前索引
             if (mDrection == DIRECTION_RIGHT && position + positionOffset > mSelectedIndex + 1) {
                 mSelectedIndex = position;
-                if (DEBUG) {
-                    Log.d(TAG, "向左快速滑动");
-                }
             } else {
                 setProgress(positionOffset);
             }
@@ -568,14 +607,10 @@ public class DotIndicator extends View {
             //向右快速滑动
             if (mDrection == DIRECTION_LEFT && position + positionOffset < mSelectedIndex - 1) {
                 mSelectedIndex = position;
-               if (DEBUG) {
-                   Log.d(TAG, "向右快速滑动");
-               }
             } else {
                 setProgress(1 - positionOffset);
             }
         }
-
     }
 
 

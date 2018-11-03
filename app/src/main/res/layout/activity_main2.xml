@@ -26,7 +26,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:selectedColor="@android:color/white"
+        app:selectedColor="#e6c"
         app:selectedRadius="13dp"
         app:spacing="20dp"
         app:unSelectedColor="@android:color/darker_gray"
